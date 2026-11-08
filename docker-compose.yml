@@ -1,0 +1,23 @@
+name: cabo                 # fixed compose project name, keeps it separate from everything else
+
+services:
+  cabo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cabo:local
+    pull_policy: build        # always build locally, never try Docker Hub
+    container_name: cabo
+    restart: unless-stopped
+    environment:
+      - SECRET_KEY=${CABO_SECRET_KEY:-change-me-to-something-random}
+      # Number of reverse proxies in front of the app whose X-Forwarded-* headers to trust
+      - PROXY_HOPS=1
+      - TZ=Europe/London
+    ports:
+      # host:container - point your reverse proxy at http://<server-ip>:8088
+      - "8088:8000"
+    # Resource caps so Cabo can never hog the server
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 100

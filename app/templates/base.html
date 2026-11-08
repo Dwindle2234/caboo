@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#140a24">
+  <title>{% block title %}Cabo{% endblock %}</title>
+  <link rel="icon" href="{{ asset('cards/AS.svg') }}">
+  <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+</head>
+<body class="{% block body_class %}{% endblock %}"
+      data-api="{{ url_for('lobby', table=table) }}api/"
+      data-cards="{{ url_for('static', filename='cards/') }}"
+      data-v="{{ ASSET_VERSION }}"
+      data-lobby="{{ url_for('lobby', table=table) }}"
+      data-table="{{ table }}">
+  {% block content %}{% endblock %}
+  <script src="{{ asset('js/common.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,87 @@
+<div class="overlay" id="rules-overlay" hidden>
+  <div class="panel rules-panel">
+    <button class="close" data-close="rules-overlay" aria-label="Close">×</button>
+    <h2>How to play Cabo</h2>
+    <p><strong>Goal:</strong> have the lowest total when someone calls Cabo. You can't see your own cards,
+      so you have to remember them.</p>
+
+    <h3>Setup</h3>
+    <p>Everyone gets {{ RULES.cards_per_player }} cards face down in a row. No card is turned up, so the discard
+      pile starts empty. Before play, each player looks at
+      <strong>cards {% for i in RULES.initial_peek_slots %}{{ i + 1 }}{% if not loop.last %} and {% endif %}{% endfor %}</strong>
+      (the first and last) for a few seconds. Remember them!</p>
+
+    <h3>Your turn — do one of these</h3>
+    <ul>
+      <li><strong>Draw from the deck.</strong> Only you see it. Then either:
+        <ul>
+          <li><strong>Keep it:</strong> tap one of your cards to swap it out (that card goes face-up on the discard pile), or</li>
+          <li><strong>Discard it.</strong> Nothing else happens.</li>
+        </ul></li>
+      <li><strong>Take the top discard</strong> and swap it for one of your cards.</li>
+      <li><strong>Call CABO</strong> instead of drawing. Everyone else gets one more turn, then the cards are shown.</li>
+    </ul>
+
+    <h3>Matching</h3>
+    <p>When keeping a card you can swap out 2, 3 or 4 of your cards at once if they're <em>all the same rank</em>.
+      They're all replaced by the one new card. Get it wrong and everyone sees the cards, they go back,
+      the new card is discarded and you lose your turn.</p>
+
+    <h3>SLAPDOWN!</h3>
+    <p>Whenever a card lands on the discard pile, <strong>everyone</strong>, including the player who discarded it,
+      can race to slap a card of the <strong>same rank</strong> onto it (e.g. a 10 on a 10). Tap <strong>SLAP!</strong>,
+      then tap your card. The window lasts {{ RULES.slap_seconds }} seconds, and the fastest slap wins.</p>
+    <ul>
+      <li><strong>Slaps make pairs.</strong> The first slap is one card, which makes a pair with the discard. After that,
+        every slap must be a <strong>pair</strong>.</li>
+      <li><strong>Stealing:</strong> any slap can use cards from <em>other players'</em> hands. Tap their card instead of
+        yours. Spied a 10 in Tom's hand? Slap it onto the 10! When a pair is needed, it can be two of yours, one of each,
+        or <strong>two stolen cards</strong>.</li>
+      <li><strong>Pay back a steal:</strong> after a successful steal you must either <strong>give the player one of your
+        cards</strong> or <strong>make them draw</strong> one from the deck. You have {{ RULES.steal_choice_seconds }} seconds to choose,
+        or they draw. Steal two cards and you pay back twice.</li>
+      <li><strong>Wrong slap</strong> (e.g. a 9 on a 10, or stealing a card that isn't a 10): everyone sees the card(s), they stay
+        with their owners, and you draw {{ RULES.slap_penalty_cards }} card blind as a penalty.</li>
+      <li>Slapped cards don't trigger powers.</li>
+    </ul>
+
+    <h3>Quartet</h3>
+    <p>Hold all four cards of one rank? On your turn, instead of drawing, tap <strong>Quartet</strong> and play all four.
+      That's an <strong>immediate win</strong>, whatever other cards you're still holding and whatever the points.
+      Get it wrong and everyone sees the cards, they go back and you lose your turn.</p>
+
+    <h3>Power cards</h3>
+    <p>A power works when you <strong>swap a power card OUT of your hand</strong> (by keeping a card from the
+      deck or the discard pile). Discarding a power card you've just drawn does nothing. Using the power is
+      optional. If you swap out a matching set, you get the power once.</p>
+    <ul>
+      <li><strong>7 · 8 — Peek:</strong> look at one of your own cards.</li>
+      <li><strong>9 · 10 — Spy:</strong> look at one card of another player.</li>
+      <li><strong>J — Swap:</strong> blind-swap any two cards (yours or anyone's). Nobody looks.</li>
+      <li><strong>Q — Peek &amp; swap:</strong> look at any card, then you <em>may</em> blind-swap any two cards.
+        It doesn't have to be the one you looked at.</li>
+      <li><strong>Joker:</strong> give one of your cards to another player, <em>or</em> pick a player who must
+        draw a card from the deck into their hand (face down, nobody sees it).</li>
+      <li><strong>A♠ — Turn over:</strong> turn up to {{ RULES.turnover_max }} cards (yours or anyone's) face up for the rest of the round.</li>
+    </ul>
+
+    <h3>Empty deck</h3>
+    <p>When the deck runs out, the whole discard pile is shuffled and becomes a fresh deck.</p>
+
+    <h3>Card values</h3>
+    <p>A 1 · 2–10 face value · J, Q and black K 10 · <strong>red K −2</strong> · <strong>Joker 11</strong></p>
+
+    <h3>End of the round</h3>
+    <ul>
+      <li>The round only ends when someone calls CABO and everyone else has had one more turn
+        (or when someone plays a quartet). The last discard can still be slapped before the cards are shown.</li>
+      <li>Lowest total wins.</li>
+      <li><strong>Ties:</strong> the tied player with the <em>most cards</em> wins. Still tied on cards? It's a draw between them.</li>
+      <li>Each game is a single round. Deal again for another.</li>
+    </ul>
+    <p style="margin-top:1rem;text-align:center;font-size:.75rem;color:var(--muted)">Cabo v{{ ASSET_VERSION }}</p>
+    <div class="rules-actions">
+      <button class="btn btn-ghost" id="end-game-btn" hidden>End this round for everyone</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Cabo · Table {{ table }}{% endblock %}
+{% block body_class %}board-page{% endblock %}
+{% block content %}
+<div class="board">
+  <header class="board-top">
+    <span class="logo">CABO</span>
+    <span class="me" id="board-info">Table {{ table }}</span>
+    <button class="btn btn-small btn-ghost" data-open="rules-overlay">Rules</button>
+    <a class="btn btn-small btn-ghost" href="{{ url_for('lobby', table=table) }}">Lobby</a>
+  </header>
+  <div class="felt">
+    <div class="board-players" id="players"></div>
+    <div class="board-centre">
+      <div class="piles">
+        <div class="pile" id="deck">
+          <img src="{{ asset('cards/back.svg') }}" alt="draw pile">
+          <span class="pile-count" id="deck-count">0</span><span class="pile-label">Deck</span>
+        </div>
+        <div class="pile" id="discard"><img id="discard-img" alt=""><span class="pile-label">Discard</span></div>
+        <div class="pile drawn" id="drawn" hidden><img id="drawn-img" alt=""><span class="pile-label" id="drawn-label"></span></div>
+      </div>
+      <div class="status big" id="status"></div>
+      <div class="board-log" id="log"></div>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="results-overlay" hidden>
+  <div class="panel results-panel"><div id="results"></div></div>
+</div>
+{% include "_rules.html" %}
+{% endblock %}
+{% block scripts %}
+<script src="{{ asset('js/board.js') }}"></script>
+{% endblock %}

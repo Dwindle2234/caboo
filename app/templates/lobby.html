@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Cabo · Lobby{% endblock %}
+{% block body_class %}lobby{% endblock %}
+{% block content %}
+<main class="lobby-wrap">
+  <header class="brand">
+    <img src="{{ asset('cards/back.svg') }}" alt="" class="brand-card">
+    <div>
+      <h1>CABO</h1>
+      <p class="sub">Table <strong>{{ table }}</strong> · 2–5 players</p>
+    </div>
+  </header>
+
+  <section class="seat-list" id="seat-list">
+    {% for n in seats %}
+    <a class="seat-tile" id="tile-{{ n }}" href="{{ url_for('seat_view', table=table, seat=n) }}">
+      <span class="seat-num">Seat {{ n }}</span>
+      <span class="seat-name" id="tile-name-{{ n }}">Empty — tap to sit</span>
+    </a>
+    {% endfor %}
+  </section>
+
+  <a class="btn btn-ghost wide" href="{{ url_for('board_view', table=table) }}">Open table view (TV / laptop)</a>
+
+  <p class="hint">Share this link with your mates. Each phone picks a seat.<br>
+    Want a private game? Use <code>/t/&lt;your-table-name&gt;/</code>.</p>
+</main>
+{% endblock %}
+{% block scripts %}
+<script>
+  Cabo.poll(state => {
+    state.seats.forEach(s => {
+      const tile = document.getElementById('tile-' + s.seat);
+      const name = document.getElementById('tile-name-' + s.seat);
+      tile.classList.toggle('taken', s.taken);
+      tile.classList.toggle('online', s.online);
+      name.textContent = s.taken ? s.name + (s.online ? '' : ' (away)') : 'Empty — tap to sit';
+    });
+  });
+</script>
+{% endblock %}

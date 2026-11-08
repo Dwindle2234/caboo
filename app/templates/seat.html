@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Cabo · Seat {{ seat }}{% endblock %}
+{% block body_class %}seat-page{% endblock %}
+{% block content %}
+<div class="seat-screen" id="screen" data-seat="{{ seat }}">
+  <header class="topbar">
+    <a href="{{ url_for('lobby', table=table) }}" class="logo">CABO</a>
+    <span class="me" id="me-label">Seat {{ seat }}</span>
+    <button class="btn btn-small btn-ghost" data-open="rules-overlay">Rules</button>
+    <button class="btn btn-small btn-ghost" id="leave-btn" hidden>Leave</button>
+  </header>
+
+  <section class="opponents" id="opponents"></section>
+
+  <section class="centre" id="centre">
+    <div class="piles" id="piles">
+      <div class="pile" id="deck">
+        <img src="{{ asset('cards/back.svg') }}" alt="draw pile">
+        <span class="pile-count" id="deck-count">0</span>
+        <span class="pile-label">Deck</span>
+      </div>
+      <div class="pile" id="discard">
+        <img id="discard-img" alt="discard pile">
+        <span class="pile-label">Discard</span>
+      </div>
+      <div class="pile drawn" id="drawn" hidden>
+        <img id="drawn-img" alt="drawn card">
+        <span class="pile-label" id="drawn-label">You drew</span>
+      </div>
+    </div>
+    <div class="status" id="status"></div>
+    <div class="actions" id="actions"></div>
+    <div class="lobby-box" id="lobby-box" hidden></div>
+  </section>
+
+  <section class="my-area" id="my-area">
+    <div class="my-head">
+      <span id="my-name">You</span>
+      <span class="badge turn" id="my-turn" hidden>YOUR TURN</span>
+      <span class="badge cabo" id="my-cabo" hidden>CABO</span>
+      <span class="spacer"></span>
+      <span class="total-pill" id="my-total" title="Total score">0</span>
+    </div>
+    <div class="slap-bar" id="slap-bar" hidden></div>
+    <div class="slap-bar debt-bar" id="debt-bar" hidden></div>
+    <div class="my-slots" id="my-slots"></div>
+  </section>
+
+  <div class="log" id="log"></div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<div class="overlay" id="join-overlay" hidden>
+  <form class="panel" id="join-form">
+    <h2>Seat {{ seat }}</h2>
+    <p id="join-msg">What do they call you?</p>
+    <input id="join-name" maxlength="16" placeholder="Your name" autocomplete="nickname" required>
+    <button class="btn btn-neon wide" type="submit">Take seat</button>
+    <a class="btn btn-ghost wide" href="{{ url_for('lobby', table=table) }}">Back to lobby</a>
+  </form>
+</div>
+
+<div class="overlay" id="results-overlay" hidden>
+  <div class="panel results-panel">
+    <div id="results"></div>
+    <div class="results-actions">
+      <button class="btn btn-neon" id="next-btn">Next round</button>
+      <button class="btn btn-ghost" id="hide-results">See table</button>
+    </div>
+  </div>
+</div>
+
+{% include "_rules.html" %}
+{% endblock %}
+{% block scripts %}
+<script src="{{ asset('js/seat.js') }}"></script>
+{% endblock %}
