@@ -13,6 +13,7 @@ Routes
 """
 import os
 import re
+import secrets
 
 from flask import Flask, abort, jsonify, redirect, render_template, request, url_for
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -20,7 +21,9 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from game import MAX_SEATS, RULES, RuleError, TableRegistry
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-me")
+# Flask's signing key. Cabo doesn't use cookies/sessions yet, so it isn't critical - but it must never live
+# in the repo. Set CABO_SECRET_KEY in the untracked .env file; if it's not set, a random key is made at startup.
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
 app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
 
 _hops = int(os.environ.get("PROXY_HOPS", "1"))

@@ -1,0 +1,8 @@
+# secrets - never commit
+.env
+
+# Python / build leftovers
+__pycache__/
+*.pyc
+.venv/
+*.zip

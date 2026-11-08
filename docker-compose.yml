@@ -10,7 +10,8 @@ services:
     container_name: cabo
     restart: unless-stopped
     environment:
-      - SECRET_KEY=${CABO_SECRET_KEY:-change-me-to-something-random}
+      # Secrets come from the untracked .env file next to this one (see .env.example). Never put them here.
+      - SECRET_KEY=${CABO_SECRET_KEY:-}
       # Number of reverse proxies in front of the app whose X-Forwarded-* headers to trust
       - PROXY_HOPS=1
       - TZ=Europe/London
