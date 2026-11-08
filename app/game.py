@@ -5,7 +5,8 @@ Based on the original Cabo (Melissa Limes & Mandy Henning, 2010), played with
 a 54-card deck and our LOCAL RULES:
 
   * Deal: 4 cards each, no card turned up. Each player then looks at cards 1 and 4.
-  * Each game is a single round, and it only ends when someone calls Cabo.
+  * 2-6 players. Each game is a single round, and it only ends when someone calls Cabo.
+  * The Cabo caller gets -1 on their final count.
   * Values: A-10 face value, J / Q / black K = 10, red K = -2, Joker = 11.
   * Powers trigger only when a power card is SWAPPED OUT of your hand (by
     keeping a drawn or discard-pile card). Discarding a power card you've just
@@ -42,7 +43,7 @@ import uuid
 SUITS = ["S", "H", "D", "C"]
 RANKS = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
 JOKERS = ["JR", "JB"]
-MAX_SEATS = 5
+MAX_SEATS = 6
 MIN_PLAYERS = 2
 
 RULES = {
@@ -71,6 +72,7 @@ RULES = {
     "slap_show_seconds": 4,                 # how long a wrong slap / bad match stays face up
     "steal_choice_seconds": 15,             # stealer's time to give a card / make the victim draw (then: draw)
     # ---- end of round
+    "cabo_bonus": -1,                       # the player who called Cabo gets this added to their final count
     "tie_break": "most_cards",              # lowest total; ties -> most cards; still tied -> draw
 }
 
@@ -804,6 +806,9 @@ class Table:
             self._settle(debt, "draw", auto=True)
         hands = {s: [c for c in self.slots[s] if c is not None] for s in self.order}
         sums = {s: sum(value_of(c, self.rules) for c in hands[s]) for s in self.order}
+        bonus = self.rules["cabo_bonus"]
+        if self.cabo_by is not None and bonus:
+            sums[self.cabo_by] += bonus                 # Cabo caller's bonus (-1), counted before the winner is decided
         counts = {s: len(hands[s]) for s in self.order}
         low = min(sums.values())
         lowest = [s for s in self.order if sums[s] == low]
@@ -819,9 +824,13 @@ class Table:
                              f"({most}).")
             else:
                 notes.append(f"It's a draw! {' & '.join(self._name(s) for s in winners)} tied on {low} "
-                             f"points and {most} cards.")
+                             f"points and {most} card{'s' if most != 1 else ''}.")
         if caller is not None:
-            if caller in winners:
+            if bonus:
+                notes.append(f"{self._name(caller)} called Cabo: {bonus:+d} bonus on their count.")
+            if caller in winners and len(winners) > 1:
+                notes.append(f"{self._name(caller)} called Cabo and shares the draw.")
+            elif caller in winners:
                 notes.append(f"{self._name(caller)} called Cabo and won.")
             else:
                 notes.append(f"{self._name(caller)} called Cabo but didn't win!")

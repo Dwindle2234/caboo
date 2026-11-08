@@ -1,6 +1,6 @@
 # Cabo
 
-Cabo, the memory card game, for 2–5 players on their phones. Built with Python and Flask, and runs in Docker.
+Cabo, the memory card game, for 2–6 players on their phones. Built with Python and Flask, and runs in Docker.
 
 ## Build & run
 
@@ -40,7 +40,7 @@ The in-game **Rules** button shows the same summary.
     from the deck into their hand (face down, unseen).
   * A♠ **Turn over:** turn up to 2 cards (anyone's) face up for the rest of the round.
 * **Values:** A 1, 2–10 face value, J / Q / black K 10, **red K −2**, **Joker 11**.
-* **End:** a round only ends when CABO is called. Lowest total wins.
+* **End:** a round only ends when CABO is called. The caller gets **−1** on their final count, then the lowest total wins.
   **Ties:** the tied player with the most cards wins; if still tied, it's a draw between them.
   Each game is a single round; the table keeps a 🏆 tally of rounds won.
 * **SLAPDOWN:** when a card is discarded, **everyone** (the discarder too) can race to slap a card of the same rank

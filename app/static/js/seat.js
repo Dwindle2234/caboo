@@ -310,7 +310,7 @@
     const seated = st.seats.filter(s => s.taken);
     box.innerHTML = `<div class="lobby-players">${seated.map(s =>
       `<span class="chip ${s.online ? 'on' : ''}">${E(s.name)}</span>`).join('') || 'Nobody yet'}</div>
-      <p>${seated.length}/5 seated — need ${st.min_players}+ to play.</p>
+      <p>${seated.length}/${st.seats.length} seated — need ${st.min_players}+ to play.</p>
       ${token ? `<button class="btn btn-neon" data-act="start_game" ${seated.length < st.min_players ? 'disabled' : ''}>Deal</button>` : ''}`;
   }
 

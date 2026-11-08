@@ -133,7 +133,8 @@ a { color: inherit; }
 .me { flex: 1; color: var(--muted); font-size: .85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .opponents { display: grid; gap: 8px; grid-template-columns: 1fr; }
-.opponents.n2, .opponents.n3, .opponents.n4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.opponents.n2, .opponents.n3, .opponents.n4, .opponents.n5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.opponents.n5 .opp:first-child { grid-column: 1 / -1; }
 .opponents.n3 .opp:first-child { grid-column: 1 / -1; }
 .opp { padding: 7px 8px 10px; border-radius: var(--radius); background: rgba(255, 255, 255, .05);
   box-shadow: 0 0 0 1px rgba(255, 255, 255, .1) inset; }
