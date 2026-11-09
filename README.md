@@ -86,6 +86,13 @@ build.sh                build + run, only touches the cabo-game container and ca
 * **Version / cache busting:** `app/version.txt` holds a single number that's bumped on every change.
   It's appended to every JS/CSS/card URL (`?v=7`), so phones fetch fresh files after an update.
   The running version is shown at the bottom of the in-game Rules screen.
+* **Card art:** all cards are drawn by `tools/generate_cards.py` during the Docker build.
+  - **Court cards** (J, Q, K) use the classic traditional figures from Byron Knoll's *vector-playing-cards*,
+    which he released into the public domain (https://github.com/notpeter/vector-playing-cards). They're
+    recoloured in the Cabo neon-and-gold palette (`COURT_PALETTE` in the generator). `tools/import_courts.py`
+    imported them once into `tools/court_art.json`; you only need to re-run it to import a different set.
+  - **The Ace of Spades** is Cabo's own design (`ace_of_spades()` in the generator).
+  - The court art is detailed, so the app gzip-compresses card, script and style files (about 2.2 MB down to 660 KB for the deck).
 * **Icon:** `app/static/icon.svg` / `icon.png` (made by `tools/make_icon.py`) is the Unraid dashboard icon
   (set by the `net.unraid.docker.icon` label in `docker-compose.yml`), the browser-tab icon and the
   phone home-screen icon.

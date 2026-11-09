@@ -9,6 +9,7 @@ File names:  AS.svg, 10H.svg, KD.svg ...  JR.svg (red joker), JB.svg (black joke
 
 Run:  python tools/generate_cards.py
 """
+import json
 import math
 import os
 import sys
@@ -147,17 +148,81 @@ def corner_index(rank, suit_name, color):
     return f"<g>{g}</g><g transform='rotate(180 {W / 2} {H / 2})'>{g}</g>"
 
 
+def ace_of_spades():
+    """The showpiece card: neon night, gold sunburst, a jewelled spade with the Cabo pin-up inside."""
+    spade = SUIT_PATHS["spade"]
+    defs = (
+        f'<radialGradient id="aceSpot" cx="0.5" cy="0.38" r="0.7">'
+        f'<stop offset="0" stop-color="#ff9fcb"/><stop offset="0.45" stop-color="{PINK}"/>'
+        f'<stop offset="1" stop-color="#4a0f4a"/></radialGradient>'
+        f'<linearGradient id="aceGold" x1="0" y1="0" x2="0" y2="1">'
+        f'<stop offset="0" stop-color="#fff1b8"/><stop offset="0.45" stop-color="{GOLD}"/>'
+        f'<stop offset="1" stop-color="#8a5a12"/></linearGradient>'
+        f'<radialGradient id="aceBg" cx="0.5" cy="0.42" r="0.75">'
+        f'<stop offset="0" stop-color="#3a1660"/><stop offset="1" stop-color="{NIGHT}"/></radialGradient>'
+        f'<filter id="aceGlow" x="-20%" y="-20%" width="140%" height="140%">'
+        f'<feGaussianBlur stdDeviation="3.5" result="b"/>'
+        f'<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'
+        f'<clipPath id="aceClip"><path d="{spade}" transform="translate(40 52) scale(1.7)"/></clipPath>'
+    )
+    body = (f'<rect x="1.5" y="1.5" width="{W - 3}" height="{H - 3}" rx="{R}" fill="url(#aceBg)" '
+            f'stroke="#3a2450" stroke-width="3"/>')
+    # gold sunburst behind the spade
+    rays = ""
+    cx, cy = 125, 150
+    for k in range(32):
+        a1, a2 = math.radians(k * 11.25), math.radians(k * 11.25 + 4.5)
+        rays += (f'M{cx} {cy} L{cx + 190 * math.cos(a1):.1f} {cy + 190 * math.sin(a1):.1f} '
+                 f'L{cx + 190 * math.cos(a2):.1f} {cy + 190 * math.sin(a2):.1f} Z ')
+    body += (f'<clipPath id="aceCard"><rect x="14" y="14" width="{W - 28}" height="{H - 28}" rx="10"/></clipPath>'
+             f'<path d="{rays}" fill="{GOLD}" opacity="0.16" clip-path="url(#aceCard)"/>')
+    # neon + gold frame, as on the back
+    body += (f'<rect x="12" y="12" width="{W - 24}" height="{H - 24}" rx="10" fill="none" stroke="{PINK}" '
+             f'stroke-width="3" filter="url(#aceGlow)"/>'
+             f'<rect x="19" y="19" width="{W - 38}" height="{H - 38}" rx="6" fill="none" stroke="{GOLD}" stroke-width="1.2"/>')
+    # art-deco fans in the corners
+    for (fx, fy, a0) in [(W - 19, 19, 90), (19, H - 19, 270)]:          # the corners without indices
+        for k in range(6):
+            ang = math.radians(a0 + 6 + k * 15.5)
+            body += (f'<line x1="{fx}" y1="{fy}" x2="{fx + 30 * math.cos(ang):.1f}" '
+                     f'y2="{fy + 30 * math.sin(ang):.1f}" stroke="{GOLD}" stroke-width="1.2" opacity=".8"/>')
+    # the jewelled spade: glow, gradient fill, pin-up inside, gold rims
+    big = 'transform="translate(40 52) scale(1.7)"'
+    body += f'<path d="{spade}" {big} fill="{PINK}" opacity=".55" filter="url(#aceGlow)"/>'
+    body += f'<path d="{spade}" {big} fill="url(#aceSpot)"/>'
+    body += (f'<g clip-path="url(#aceClip)"><g transform="translate(95 92) scale(0.56)">'
+             f'<path d="{figure_path()}" fill="{NIGHT}" fill-rule="evenodd"/></g></g>')
+    body += f'<path d="{spade}" {big} fill="none" stroke="url(#aceGold)" stroke-width="2.6"/>'
+    body += (f'<path d="{spade}" transform="translate(52 64) scale(1.46)" fill="none" stroke="{GOLD}" '
+             f'stroke-width="1.1" stroke-dasharray="2 3" opacity=".9"/>')
+    # jewels at the spade's shoulders and tip
+    for (jx, jy) in [(125, 58), (58, 162), (192, 162)]:
+        body += (f'<circle cx="{jx}" cy="{jy}" r="5" fill="url(#aceGold)" stroke="{NIGHT}" stroke-width="1.5"/>'
+                 f'<circle cx="{jx - 1.5}" cy="{jy - 1.5}" r="1.6" fill="#fff" opacity=".8"/>')
+    # ribbon banner with CABO
+    body += (f'<path d="M42 254 L60 248 L60 280 L42 286 L50 270 Z" fill="#8a5a12"/>'
+             f'<path d="M208 254 L190 248 L190 280 L208 286 L200 270 Z" fill="#8a5a12"/>'
+             f'<path d="M56 244 Q125 233 194 244 L194 278 Q125 267 56 278 Z" fill="url(#aceGold)" '
+             f'stroke="{NIGHT}" stroke-width="1.5"/>'
+             f'<text x="125" y="268" font-family="{SANS}" font-size="20" font-weight="900" letter-spacing="6" '
+             f'text-anchor="middle" fill="{NIGHT}">CABO</text>'
+             f'<text x="122" y="304" font-family="{FONT}" font-size="9" letter-spacing="3" text-anchor="middle" '
+             f'fill="{GOLD}">ACE · OF · SPADES</text>')
+    # little gold stars
+    for (sx, sy, sc) in [(42, 226, .7), (208, 226, .7), (125, 32, .6)]:
+        body += (f'<g transform="translate({sx} {sy}) scale({sc})">'
+                 f'<path d="M0 -9 L2.5 -2.5 L9 0 L2.5 2.5 L0 9 L-2.5 2.5 L-9 0 L-2.5 -2.5 Z" fill="{GOLD}"/></g>')
+    # gold corner indices
+    body += corner_index("A", "spade", GOLD)
+    return svg_doc(body, defs)
+
+
 def number_card(rank, suit):
     suit_name, color = SUITS[suit]
     body = card_base() + corner_index(rank, suit_name, color)
     if rank == "A":
-        if suit == "S":   # the ornate Ace of Spades
-            body += (f'<circle cx="125" cy="175" r="78" fill="none" stroke="{GOLD}" stroke-width="3"/>'
-                     f'<circle cx="125" cy="175" r="70" fill="none" stroke="{GOLD}" stroke-width="1" '
-                     f'stroke-dasharray="3 4"/>')
-            body += suit_use(suit_name, 125, 172, 120, color)
-            body += (f'<text x="125" y="290" font-family="{SANS}" font-size="13" letter-spacing="4" '
-                     f'text-anchor="middle" fill="{GOLD}">CABO</text>')
+        if suit == "S":
+            return ace_of_spades()
         else:
             body += suit_use(suit_name, 125, 175, 100, color)
     else:
@@ -192,7 +257,56 @@ def dagger_icon(color):
             f'<circle cx="0" cy="42" r="6" fill="{GOLD}" stroke="{color}" stroke-width="3"/>')
 
 
+# --------------------------------------------------------------------------- traditional court art
+# Classic court figures (public domain, Byron Knoll), imported by tools/import_courts.py and
+# recoloured here in the Cabo neon-and-gold palette. Change a colour below and rebuild to restyle.
+COURT_PALETTE = {
+    "red": PINK,            # robes, hearts
+    "darkred": "#b0124f",
+    "yellow": GOLD,         # crowns, trims
+    "olive": "#b8862b",
+    "green": "#18c9b8",     # small accents -> neon teal
+    "darkgreen": "#0e6f68",
+    "blue": "#46207a",      # robes -> deep violet
+    "lightblue": "#b28be0", # hair, sleeves -> lilac
+    "ink": NIGHT,           # outlines
+    "paper": PAPER,
+}
+_ART_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "court_art.json")
+COURT_ART = json.load(open(_ART_FILE)) if os.path.exists(_ART_FILE) else None
+
+
+def traditional_court(rank, suit):
+    suit_name, color = SUITS[suit]
+    art = COURT_ART["cards"][rank + suit]
+    sx, sy, sw, sh = COURT_ART["panel"]
+    pw = 160.0
+    k = pw / sw
+    ph = sh * k
+    px, py = (W - pw) / 2, (H - ph) / 2
+    defs = f'<clipPath id="panel"><rect x="{sx}" y="{sy}" width="{sw}" height="{sh}"/></clipPath>'
+    body = card_base() + corner_index(rank, suit_name, color)
+    # panel background + the figure, recoloured
+    body += (f'<rect x="{px:.1f}" y="{py:.1f}" width="{pw:.1f}" height="{ph:.1f}" rx="4" fill="{PAPER}"/>'
+             f'<g transform="translate({px - sx * k:.3f} {py - sy * k:.3f}) scale({k:.5f})">'
+             f'<g clip-path="url(#panel)"><g transform="{art["transform"]}"><g transform="scale({art.get("grid", 1)})">')
+    for group, d in art["shapes"]:
+        body += f'<path d="{d}" fill="{COURT_PALETTE.get(group, NIGHT)}"/>'
+    body += '</g></g></g></g>'
+    # traditional big pips in the panel corners (top-left, and mirrored bottom-right)
+    pip = suit_use(suit_name, px + 22, py + 26, 30, color)
+    body += pip + f'<g transform="rotate(180 {W / 2} {H / 2})">{pip}</g>'
+    # neon + gold frame around the panel
+    body += (f'<rect x="{px - 3:.1f}" y="{py - 3:.1f}" width="{pw + 6:.1f}" height="{ph + 6:.1f}" rx="6" '
+             f'fill="none" stroke="{GOLD}" stroke-width="2.5"/>'
+             f'<rect x="{px:.1f}" y="{py:.1f}" width="{pw:.1f}" height="{ph:.1f}" rx="4" fill="none" '
+             f'stroke="{PINK}" stroke-width="1.2"/>')
+    return svg_doc(body, defs)
+
+
 def court_card(rank, suit):
+    if COURT_ART:
+        return traditional_court(rank, suit)
     suit_name, color = SUITS[suit]
     gid = f"g{rank}{suit}"
     defs = (f'<linearGradient id="{gid}" x1="0" y1="0" x2="1" y2="1">'

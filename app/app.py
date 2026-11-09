@@ -11,8 +11,10 @@ Routes
   /t/<table>/api/act         -> every game move
   /healthz                   -> health check
 """
+import gzip
 import logging
 import os
+import threading
 import platform
 import re
 import secrets
@@ -121,6 +123,42 @@ def no_stale_pages(resp):
         resp.headers["Cache-Control"] = "no-store"
     else:
         resp.headers["Cache-Control"] = "no-cache"
+    return resp
+
+
+# Compress text static files (card SVGs, JS, CSS). The traditional court cards are detailed
+# artwork (~2 MB as text) but gzip down to ~640 KB, so phones load the deck much faster.
+_GZIP_TYPES = ("image/svg+xml", "text/css", "text/javascript", "application/javascript", "text/html")
+_gzip_cache = {}
+_gzip_lock = threading.Lock()
+
+
+@app.after_request
+def gzip_static(resp):
+    if (request.endpoint != "static" or resp.status_code != 200
+            or "gzip" not in request.headers.get("Accept-Encoding", "")
+            or not resp.mimetype or not resp.mimetype.startswith(_GZIP_TYPES)
+            or resp.headers.get("Content-Encoding")):
+        return resp
+    try:
+        path = os.path.join(app.static_folder, request.view_args.get("filename", ""))
+        key = (path, os.path.getmtime(path))
+    except (OSError, TypeError):
+        return resp
+    with _gzip_lock:
+        data = _gzip_cache.get(key)
+    if data is None:
+        resp.direct_passthrough = False
+        data = gzip.compress(resp.get_data(), compresslevel=9)
+        with _gzip_lock:
+            _gzip_cache[key] = data
+    resp.direct_passthrough = False
+    resp.set_data(data)
+    resp.headers["Content-Encoding"] = "gzip"
+    resp.headers["Content-Length"] = str(len(data))
+    resp.vary.add("Accept-Encoding")
+    if resp.headers.get("ETag") and not resp.headers["ETag"].startswith("W/"):
+        resp.headers["ETag"] = "W/" + resp.headers["ETag"]      # compressed bytes differ from the file
     return resp
 
 
