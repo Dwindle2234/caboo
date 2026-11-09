@@ -407,7 +407,12 @@
     evs.filter(e => e.id > seenEvent).forEach(e => {
       const until = Date.now() + 2600;
       (e.positions || []).forEach(([s, i]) => flashes.set(s + ':' + i, until));
-      if (e.seat !== SEAT || ['badmatch', 'roundend', 'slapfail', 'badquartet', 'stealdraw', 'stealgive'].includes(e.type)) toast(e.text);
+      // routine moves just go in the commentary; pop-ups are kept for what matters to this player
+      const touchesMe = e.seat !== SEAT && ((e.positions || []).some(([s]) => s === SEAT)
+        || (e.victims || []).includes(SEAT));
+      const bigNews = ['cabo', 'quartet', 'roundend'].includes(e.type);
+      const myMistake = e.seat === SEAT && ['badmatch', 'slapfail', 'badquartet'].includes(e.type);
+      if (touchesMe || bigNews || myMistake) toast(e.text);
     });
     seenEvent = Math.max(seenEvent, last);
     for (const [k, t] of flashes) if (t < Date.now()) flashes.delete(k);

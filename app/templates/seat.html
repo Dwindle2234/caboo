@@ -33,6 +33,8 @@
     <div class="lobby-box" id="lobby-box" hidden></div>
   </section>
 
+  <div class="log" id="log" aria-live="polite"></div>
+
   <section class="my-area" id="my-area">
     <div class="my-head">
       <span id="my-name">You</span>
@@ -41,12 +43,15 @@
       <span class="spacer"></span>
       <span class="total-pill" id="my-total" title="Total score">0</span>
     </div>
-    <div class="slap-bar" id="slap-bar" hidden></div>
-    <div class="slap-bar debt-bar" id="debt-bar" hidden></div>
     <div class="my-slots" id="my-slots"></div>
   </section>
 
-  <div class="log" id="log"></div>
+</div>
+
+<!-- urgent bars (SLAP! / pay back a steal) are pinned to the bottom so they're visible on any phone -->
+<div class="dock" id="dock">
+  <div class="slap-bar debt-bar" id="debt-bar" hidden></div>
+  <div class="slap-bar" id="slap-bar" hidden></div>
 </div>
 
 <div class="toast" id="toast" hidden></div>

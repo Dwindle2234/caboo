@@ -86,6 +86,9 @@ build.sh                build + run, only touches the cabo container/image
 * **Version / cache busting:** `app/version.txt` holds a single number that's bumped on every change.
   It's appended to every JS/CSS/card URL (`?v=7`), so phones fetch fresh files after an update.
   The running version is shown at the bottom of the in-game Rules screen.
+* **Icon:** `app/static/icon.svg` / `icon.png` (made by `tools/make_icon.py`) is the Unraid dashboard icon
+  (set by the `net.unraid.docker.icon` label in `docker-compose.yml`), the browser-tab icon and the
+  phone home-screen icon.
 * **Secrets:** nothing secret lives in the repo. Put real values in a `.env` file next to `docker-compose.yml`
   (copy `.env.example`). `.env` is ignored by git and by the Docker build. If `CABO_SECRET_KEY` isn't set,
   the app generates a random key at startup.
