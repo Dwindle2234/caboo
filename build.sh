@@ -5,13 +5,13 @@
 # Usage:   ./build.sh            build + start
 #          ./build.sh --fresh    build from scratch (no cache) + start
 #
-# Only ever touches the "cabo" container and the "cabo:local" image.
+# Only ever touches the "cabo-game" container and the "cabo:local" image.
 # Uses Docker's classic builder (no buildx needed).
 
 set -euo pipefail
 
 IMAGE="cabo:local"
-CONTAINER="cabo"
+CONTAINER="cabo-game"
 PROJECT="cabo"
 HOST_PORT="8088"
 
@@ -39,9 +39,13 @@ if docker container inspect "$CONTAINER" >/dev/null 2>&1; then
 fi
 
 # Something else on the host port?
-other=$(docker ps --format '{{.Names}} {{.Ports}}' | grep -E ":${HOST_PORT}->" | grep -v "^${CONTAINER} " || true)
+# (containers from our own compose project are fine - compose replaces them, even under an old name)
+ours=$(docker ps -q --filter "label=com.docker.compose.project=${PROJECT}")
+other=$(docker ps --format '{{.ID}} {{.Names}} {{.Ports}}' | grep -E ":${HOST_PORT}->" \
+        | grep -vE "^($(echo $ours | tr ' ' '|' | sed 's/^$/none/')) " || true)
+other=${other#* }
 [[ -z "$other" ]] || fail "Port ${HOST_PORT} is used by container: ${other%% *}"
-if ! docker ps --format '{{.Names}}' | grep -qx "$CONTAINER"; then
+if [[ -z "$ours" ]]; then
   if command -v ss >/dev/null && ss -ltn 2>/dev/null | grep -qE "[:.]${HOST_PORT}\s"; then
     fail "Port ${HOST_PORT} is already in use on this host"
   fi

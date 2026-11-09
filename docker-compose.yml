@@ -7,7 +7,8 @@ services:
       dockerfile: Dockerfile
     image: cabo:local
     pull_policy: build        # always build locally, never try Docker Hub
-    container_name: cabo
+    # Unraid remembers icons by container name; renamed from 'cabo' so Unraid looks the icon up fresh
+    container_name: cabo-game
     restart: unless-stopped
     environment:
       # Secrets come from the untracked .env file next to this one (see .env.example). Never put them here.
