@@ -34,6 +34,7 @@ Every tunable rule lives in RULES. State is in memory, so run ONE process
 (gunicorn --workers 1, any number of threads).
 """
 import copy
+import logging
 import secrets
 import threading
 import time
@@ -43,6 +44,8 @@ import uuid
 SUITS = ["S", "H", "D", "C"]
 RANKS = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
 JOKERS = ["JR", "JB"]
+log = logging.getLogger("cabo")
+
 MAX_SEATS = 6
 MIN_PLAYERS = 2
 
@@ -302,6 +305,7 @@ class Table:
             name = (name or "").strip()[:16] or f"Player {number}"
             seat.name, seat.token, seat.last_seen = name, secrets.token_urlsafe(16), time.time()
             self._event("join", f"{name} sat down")
+            log.info("[%s] %s took seat %d", self.code, name, number)
             self._bump()
             return seat.token
 
@@ -311,6 +315,7 @@ class Table:
             if number in self.order and self.phase in ("peek", "play"):
                 raise RuleError("You're in a round — end it first")
             self._event("leave", f"{seat.name} left")
+            log.info("[%s] %s left seat %d", self.code, seat.name, number)
             seat.name = seat.token = None
             self.wins.pop(number, None)
             self._bump()
@@ -359,6 +364,8 @@ class Table:
         lead_in = 1.2
         self.deal = {"id": uuid.uuid4().hex[:10], "started": time.time() + lead_in,
                      "interval_ms": self.rules["deal_interval_ms"], "sequence": sequence}
+        log.info("[%s] Round %d dealt: %d players (%s), %s starts", self.code, self.round_no, len(self.order),
+                 ", ".join(self._name(s) for s in self.order), self._name(starter))
         self._event("round", f"Round {self.round_no} — {self._name(starter)} starts. "
                              f"Look at your cards {self._peek_names()}.")
         self._bump()
@@ -763,6 +770,7 @@ class Table:
             if self.cabo_by is not None:
                 raise RuleError("Cabo has already been called")
             self.cabo_by = seat
+            log.info("[%s] Round %d: %s called CABO", self.code, self.round_no, self._name(seat))
             self._event("cabo", f"{self._name(seat)} called CABO! Everyone else gets one more turn.",
                         seat=seat)
             self._end_turn()
@@ -861,6 +869,10 @@ class Table:
         self.slap = None
         self.debts = []
         names = " & ".join(self._name(s) for s in winners)
+        scores = ", ".join(f"{self._name(s)} {sums[s]}" for s in ranking)
+        how = "QUARTET" if quartet is not None else ("draw" if len(winners) > 1 else f"lowest {low}")
+        log.info("[%s] Round %d won by %s (%s) | %s%s", self.code, self.round_no, names, how, scores,
+                 f" | CABO: {self._name(caller)}" if caller is not None else "")
         if quartet is not None:
             self._event("roundend", f"QUARTET! {names} wins round {self.round_no}!")
         elif len(winners) > 1:
@@ -874,6 +886,7 @@ class Table:
             if self.phase == "lobby":
                 return
             self._event("game", f"{self._name(by)} ended the round")
+            log.info("[%s] Round %d abandoned by %s", self.code, self.round_no, self._name(by))
             self._clear_round()
             self.phase = "lobby"
             self._bump()

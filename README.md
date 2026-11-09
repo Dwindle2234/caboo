@@ -89,6 +89,9 @@ build.sh                build + run, only touches the cabo-game container and ca
 * **Icon:** `app/static/icon.svg` / `icon.png` (made by `tools/make_icon.py`) is the Unraid dashboard icon
   (set by the `net.unraid.docker.icon` label in `docker-compose.yml`), the browser-tab icon and the
   phone home-screen icon.
+* **Logs:** `docker logs cabo-game` shows a startup banner, then one line per game event: seats taken
+  and left, rounds dealt, CABO calls and round results with everyone's points. There's no per-request
+  noise. Set `LOG_LEVEL=WARNING` in the compose `environment:` for errors only.
 * **Secrets:** nothing secret lives in the repo. Put real values in a `.env` file next to `docker-compose.yml`
   (copy `.env.example`). `.env` is ignored by git and by the Docker build. If `CABO_SECRET_KEY` isn't set,
   the app generates a random key at startup.

@@ -11,18 +11,29 @@ Routes
   /t/<table>/api/act         -> every game move
   /healthz                   -> health check
 """
+import logging
 import os
+import platform
 import re
 import secrets
+import sys
+
+import flask
 
 from flask import Flask, abort, jsonify, redirect, render_template, request, url_for
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from game import MAX_SEATS, RULES, RuleError, TableRegistry
 
+# Clean, readable container logs: one line per event that matters (no per-request access log).
+logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO").upper(), stream=sys.stdout,
+                    format="%(asctime)s %(levelname)-5s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+log = logging.getLogger("cabo")
+
 app = Flask(__name__)
 # Flask's signing key. Cabo doesn't use cookies/sessions yet, so it isn't critical - but it must never live
 # in the repo. Set CABO_SECRET_KEY in the untracked .env file; if it's not set, a random key is made at startup.
+_secret_from_env = bool(os.environ.get("SECRET_KEY"))
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
 app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
 
@@ -57,6 +68,39 @@ def _read_version():
 
 
 ASSET_VERSION = _read_version()
+
+BANNER = r"""
+   ____    _    ____   ___
+  / ___|  / \  | __ ) / _ \
+ | |     / _ \ |  _ \| | | |
+ | |___ / ___ \| |_) | |_| |
+  \____/_/   \_\____/ \___/
+"""
+
+
+def _startup_banner():
+    rows = [
+        ("Version", f"v{ASSET_VERSION}"),
+        ("Python", platform.python_version()),
+        ("Flask", flask.__version__ if hasattr(flask, "__version__") else "?"),
+        ("Port", os.environ.get("PORT", "8000") + " (inside container)"),
+        ("Proxy hops", str(_hops)),
+        ("Secret key", "from .env" if _secret_from_env else "random (CABO_SECRET_KEY not set)"),
+        ("Timezone", os.environ.get("TZ", "UTC")),
+        ("Log level", logging.getLevelName(logging.getLogger().level)),
+        ("Seats", f"{MAX_SEATS} per table"),
+        ("Slap window", f"{RULES['slap_seconds']} s"),
+        ("Steal payback", f"{RULES['steal_choice_seconds']} s"),
+    ]
+    width = max(len(k) for k, _ in rows)
+    lines = [BANNER.rstrip("\n"), "  The memory card game", "  " + "-" * 38]
+    lines += [f"  {k:<{width}}  {v}" for k, v in rows]
+    lines += ["  " + "-" * 38]
+    print("\n".join(lines), flush=True)
+    log.info("Cabo v%s ready", ASSET_VERSION)
+
+
+_startup_banner()
 
 
 def asset(filename):
