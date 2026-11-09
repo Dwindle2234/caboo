@@ -197,6 +197,9 @@
         return '';
       case 'start': return 'Your turn: draw from the deck, take the discard, or call CABO.' + caboNote;
       case 'drawn':
+        if (!(st.slots[String(SEAT)] || []).some(x => x !== null))
+          return st.drawn_from === 'discard' ? 'You have no cards: keep the card you took.'
+            : 'You have no cards: keep the card you drew, or discard it.';
         if (st.drawn_from === 'discard') return 'Tap the card (or matching cards) to swap it for, then Swap. Swapping out a power card gives you its power.';
         return 'Keep it — tap card(s) to swap out — or discard it. Swapping out a power card gives you its power.';
       case 'power-peek': return 'You swapped out a PEEK: tap one of your cards to look at it.';
@@ -228,6 +231,9 @@
       case 'slap': return '';
       case 'drawn': {
         const n = sel.mine.length;
+        const held = (st.slots[String(SEAT)] || []).filter(x => x !== null).length;
+        if (held === 0)                       // no cards in hand: keep it (no swap needed), or discard
+          return b('keep', 'Keep it', 'btn-neon') + (st.drawn_from === 'deck' ? b('discard', 'Discard') : '');
         let h = b('replace', n > 1 ? `Match ${n}` : 'Swap', 'btn-neon', n === 0);
         if (st.drawn_from === 'deck') h += b('discard', 'Discard');
         return h;

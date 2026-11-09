@@ -268,6 +268,7 @@ def api_act(table):
         "draw": lambda: t.draw_from_deck(seat),
         "take_discard": lambda: t.take_discard(seat),
         "replace": lambda: t.replace(seat, slots),
+        "keep": lambda: t.replace(seat, []),            # empty hand: keep the drawn card
         "discard": lambda: t.discard_drawn(seat),
         "peek": lambda: t.use_peek(seat, _int(data, "slot")),
         "spy": lambda: t.use_spy(seat, _int(data, "target"), _int(data, "target_slot")),

@@ -28,6 +28,8 @@ The in-game **Rules** button shows the same summary.
     or discard it. Discarding it does nothing else, even if it's a power card.
   * **Take the top discard** and swap it for one of your cards.
   * **Call CABO** instead of drawing. Everyone else gets one more turn, then the round ends.
+* **No cards left** (all slapped or given away): you can still draw or take the discard, and the card simply goes
+  into your hand. Nothing is swapped out, so there's no power and no slap window. You can also just discard a drawn card.
 * **Matching:** when keeping a card you may swap out 2–4 cards of the *same rank* for it.
   If they don't all match, everyone sees them, they go back, the new card is discarded and your turn ends.
 * **Powers:** trigger only when you **swap a power card out of your hand**, whether you're keeping a deck or

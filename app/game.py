@@ -437,6 +437,16 @@ class Table:
         with self.lock:
             self._require_turn(seat, "drawn")
             slots = sorted(set(slots))
+            if not slots and not any(c is not None for c in self.slots[seat]):
+                # no cards in hand (slapped / given away): keep the drawn card - nothing is swapped out,
+                # so no power and no slap window
+                card, src = self.drawn, self.drawn_from
+                new = self._add_to_hand(seat, card)
+                where = "the discard pile" if src == "discard" else "the deck"
+                self._event("keep", f"{self._name(seat)} had no cards and kept the card from {where}",
+                            positions=[(seat, new)], seat=seat, card=card if src == "discard" else None)
+                self._end_turn()
+                return
             if not slots:
                 raise RuleError("Pick at least one of your cards")
             if len(slots) > self.rules["max_match"]:
